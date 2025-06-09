@@ -1,32 +1,19 @@
 import { xai } from '@ai-sdk/xai';
 import { 
-    coreMessageSchema,
     streamText,
     appendResponseMessages,
     createIdGenerator,
-    appendClientMessage  
+    appendClientMessage,
+    type Message  
  } from 'ai';
-import { saveChat } from '~/tools/chat-store'
-import { loadChat } from '~/tools/chat-store'
-import { z } from "zod"
+import { saveChat, loadChat } from '~/tools/chat-store'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-// Defining Zod schema
-// const requestBodySchema = z.object({
-//     messages: z.array(coreMessageSchema),
-//     id: z.string()
-// })
-
-// // Infer the TS type from schema
-// type RequestBody = z.infer<typeof requestBodySchema>
-
 export async function POST(req: Request) {
-//   const requestJson = await req.json() as unknown;
-//   const parsedBody = requestBodySchema.parse(requestJson)
-//   const { messages, id } = parsedBody
-  const { message, id } = await req.json();
+
+  const { message, id } = await req.json() as { message: Message; id: string }
   // load previous messages from the server
   const previousMessages = await loadChat(id)
 
