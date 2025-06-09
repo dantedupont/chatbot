@@ -1,0 +1,30 @@
+[
+  {
+    "id": "msgc-cLf0iCmfVo9OAfN3",
+    "createdAt": "2025-06-09T19:09:16.124Z",
+    "role": "user",
+    "content": "tell me a joke",
+    "parts": [
+      {
+        "type": "text",
+        "text": "tell me a joke"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-WyEQ6iLVFKp96cy3",
+    "createdAt": "2025-06-09T19:09:16.698Z",
+    "content": "Why don't skeletons fight each other?\n\nBecause they don't have the guts!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Why don't skeletons fight each other?\n\nBecause they don't have the guts!"
+      }
+    ]
+  }
+]
