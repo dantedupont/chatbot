@@ -1,6 +1,5 @@
 import { xai } from '@ai-sdk/xai';
 import { coreMessageSchema, streamText } from 'ai';
-import { parse } from 'path';
 import { z } from "zod"
 
 // Allow streaming responses up to 30 seconds
@@ -15,9 +14,8 @@ const requestBodySchema = z.object({
 type RequestBody = z.infer<typeof requestBodySchema>
 
 export async function POST(req: Request) {
-  let parsedBody: RequestBody
-  const requestJson = await req.json();
-  parsedBody = requestBodySchema.parse(requestJson)
+  const requestJson = await req.json() as unknown;
+  const parsedBody = requestBodySchema.parse(requestJson)
   const { messages } = parsedBody
 
   const result = streamText({
