@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
   // consume the stream to ensure it runs to completion & triggers onFinish
   // even when the client response is aborted:
-  result.consumeStream(); // no await
+  void result.consumeStream(); // no await
 
   return result.toDataStreamResponse({
     sendSources: true,
