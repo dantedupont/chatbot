@@ -23,5 +23,5 @@ export const messages = createTable("messages", (d) => ({
   chat_id: d.varchar({ length: 256 }).references(() => chats.id),
   role: d.varchar({ length: 50 }), 
   content: d.text(),
-  createdAt: d.timestamp({ withTimezone: true }).default(sql`CURRENT_TIMESTAMP`)
+  createdAt: d.timestamp({ withTimezone: true }).default(sql`CURRENT_TIMESTAMP`).notNull()
 }));
