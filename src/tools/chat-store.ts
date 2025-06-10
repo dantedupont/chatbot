@@ -1,7 +1,5 @@
 import { generateId, type Message } from 'ai';
-import { existsSync, mkdirSync } from 'fs';
-import { writeFile, readFile } from 'fs/promises';
-import path from 'path';
+
 import { db } from '~/server/db/index'
 import { chats, messages } from '~/server/db/schema'
 import { eq } from "drizzle-orm"
