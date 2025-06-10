@@ -3,6 +3,7 @@
 import { type Message, useChat } from '@ai-sdk/react';
 import { createIdGenerator } from 'ai';
 import { Spinner } from 'src/components/ui/spinner';
+import  ReactMarkdown  from 'react-markdown'
 
 export default function Chat({
     id,
@@ -38,16 +39,23 @@ export default function Chat({
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
       {messages.map(message => (
-        <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === 'user' ? 'User: ' : 'AI: '}
-          {message.parts
-            .filter(part => part.type !== 'source')
-            .map((part, i) => {
-            switch (part.type) {
-              case 'text':
-                return <span key={`${message.id}-${i}`}>{part.text}</span>;
-            }
-          })}
+        <div 
+          key={message.id} 
+          className="group flex flex-col mb-4 p-2 border rounded-lg shadow-sm relative"
+        >
+          <div className="whitespace-pre-wrap mb-2">
+            <strong className="font-semibold">
+              {message.role === 'user' ? 'User: ' : 'AI: '}
+            </strong>
+            {message.parts
+              .filter(part => part.type !== 'source')
+              .map((part, i) => {
+              switch (part.type) {
+                case 'text':
+                  return <span key={`${message.id}-${i}`}><ReactMarkdown>{part.text}</ReactMarkdown></span>;
+              }
+            })}
+          </div>
           {message.parts
             .filter(part => part.type === 'source')
             .map(part => (
@@ -61,7 +69,9 @@ export default function Chat({
           ))}
           <button 
             onClick={() => handleDelete(message.id)}
-            className="ml-4 px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 self-center"
+            className="self-start px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400
+                       opacity-0 pointer-events-none transition-opacity duration-300
+                       group-hover:opacity-100 group-hover:pointer-events-auto"
           >
             Delete
           </button>
@@ -69,10 +79,10 @@ export default function Chat({
       ))}
 
       {(status === 'submitted' || status === 'streaming') && (
-        <div>
+        <div className="flex items-center justify-center my-4">
           {status === 'submitted' && <Spinner />}
           <button type="button" onClick={() => stop()}>
-            Stop
+            Stop Generating
           </button>
         </div>
       )}
