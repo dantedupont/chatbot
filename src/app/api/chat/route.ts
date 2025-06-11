@@ -7,6 +7,8 @@ import {
     type Message  
  } from 'ai';
 import { saveChat, loadChat } from '~/tools/chat-store'
+import { errorHandler } from '~/tools/errors';
+import { z } from "zod"
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -40,6 +42,29 @@ export async function POST(req: Request) {
             })
         })
     },
+    tools: {
+      getWeatherInformation: {
+        description: 'show the weather in a given city to the user',
+        parameters: z.object({ city: z.string() }),
+        execute: async ({}: { city: string }) => {
+          const weatherOptions = ['sunny', 'cloudy', 'rainy', 'snowy', 'windy']
+          return weatherOptions[
+            Math.floor(Math.random() * weatherOptions.length)
+          ];
+        },
+      },
+      askForConfirmation: {
+        description: 'Ask the user for confirmation',
+        parameters: z.object({
+          message: z.string().describe('The message to ask fro confirmation'),
+        }),
+      },
+      getLocation: {
+        description: 
+          "Get the user location. Always ask for confirmation before using this tool",
+        parameters: z.object({})
+      }
+    }
   });
 
   // consume the stream to ensure it runs to completion & triggers onFinish
@@ -48,20 +73,6 @@ export async function POST(req: Request) {
 
   return result.toDataStreamResponse({
     sendSources: true,
-    getErrorMessage: error => {
-      if (error == null) {
-        return 'unknown error';
-      }
-
-      if (typeof error === 'string') {
-        return error;
-      }
-
-      if (error instanceof Error) {
-        return error.message;
-      }
-
-      return JSON.stringify(error);
-    },
+    getErrorMessage: errorHandler, 
   });
 }

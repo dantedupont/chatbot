@@ -1,20 +1,21 @@
 'use client';
 
 import { type Message, useChat } from '@ai-sdk/react';
-import { createIdGenerator } from 'ai';
+import { createIdGenerator, type ToolInvocation } from 'ai';
 import { Spinner } from 'src/components/ui/spinner';
 import  ReactMarkdown  from 'react-markdown'
 
 export default function Chat({
     id,
     initialMessages,
-}: { id?: string | undefined; initialMessages?: Message[] } = {}) {
+  }: { id?: string | undefined; initialMessages?: Message[] } = {}) {
   
-  const { messages, setMessages, input, handleInputChange, handleSubmit, status, stop } 
+  const { messages, setMessages, input, handleInputChange, handleSubmit, status, stop, addToolResult } 
   = useChat({
     id,
     initialMessages,
     sendExtraMessageFields: true,
+    maxSteps: 5,
     generateId: createIdGenerator({
         prefix: 'msgc',
         size: 16
@@ -29,6 +30,17 @@ export default function Chat({
       console.log('Finished streaming message:', message);
       console.log('Token usage:', usage);
       console.log('Finish reason:', finishReason);
+    },
+    async onToolCall({ toolCall }) {
+      if(toolCall.toolName === 'getLocation') {
+        const cities = [
+          'New York',
+          'Los Angeles',
+          'Chicago',
+          'San Francisco'
+        ];
+        return cities[Math.floor(Math.random() * cities.length)]
+      }
     }
   });
   
@@ -51,11 +63,90 @@ export default function Chat({
               .filter(part => part.type !== 'source')
               .map((part, i) => {
               switch (part.type) {
+                // render text 
                 case 'text':
                   return <span key={`${message.id}-${i}`}><ReactMarkdown>{part.text}</ReactMarkdown></span>;
+                
+                // for tool invocation, distinguishing between tools and state:
+                case 'tool-invocation': {
+                  const callId = part.toolInvocation.toolCallId;
+
+                  switch (part.toolInvocation.toolName) {
+                    case 'askForConfirmation': {
+                      switch (part.toolInvocation.state) {
+                        case 'call':
+                          return (
+                            <div key={callId}>
+                              {(part.toolInvocation.args as { message: string }).message}
+                              <div>
+                                <button
+                                  onClick={() => 
+                                    addToolResult({
+                                      toolCallId: callId,
+                                      result: "Yes, confirmed"
+                                    })
+                                  }
+                                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                >
+                                  Yes
+                                </button>
+                                <button
+                                  onClick={() =>
+                                  addToolResult({
+                                    toolCallId: callId,
+                                    result: 'No, denied',
+                                  })
+                                  }
+                                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            </div>
+                          );
+                      case 'result':
+                        return (
+                          <div key={callId}>
+                            Location access allowed:{' '}
+                            {part.toolInvocation.result}
+                          </div>
+                        );
+                    }
+                    break;
+                  }
+
+                  case 'getWeatherInformation': {
+                    switch (part.toolInvocation.state) {
+                      // example of pre-rendering streaming tool calls:
+                      case 'partial-call':
+                        return (
+                          <pre key={callId}>
+                            {JSON.stringify(part.toolInvocation, null, 2)}
+                          </pre>
+                        );
+                      case 'call':
+                        return (
+                          <div key={callId}>
+                            Getting weather information for{' '}
+                            {(part.toolInvocation.args as { city: string }).city}...
+                          </div>
+                        );
+                      case 'result':
+                        return (
+                          <div key={callId}>
+                            Weather in {(part.toolInvocation.args as { city: string }).city}:{' '}
+                            {part.toolInvocation.result}
+                          </div>
+                        );
+                    }
+                    break;
+                  }
+                }
               }
-            })}
-          </div>
+            }
+          })}
+          <br />
+        </div>
           {message.parts
             .filter(part => part.type === 'source')
             .map(part => (
