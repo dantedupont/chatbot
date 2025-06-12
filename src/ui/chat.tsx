@@ -1,7 +1,7 @@
 'use client';
 
 import { type Message, useChat } from '@ai-sdk/react';
-import { createIdGenerator, type ToolInvocation } from 'ai';
+import { createIdGenerator } from 'ai';
 import { Spinner } from 'src/components/ui/spinner';
 import  ReactMarkdown  from 'react-markdown'
 
