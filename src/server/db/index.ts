@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/neon-http";
 import postgres from "postgres";
 
 import { env } from "~/env";
